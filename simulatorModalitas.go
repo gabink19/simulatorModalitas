@@ -86,11 +86,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 				wlPath := filepath.Join(worklistDir, file.Name())
 				output, err := runDCMDump(wlPath)
 				if err != nil {
-					fmt.Fprintf(w, "<tr><td colspan='5' style='color:red'>Gagal menjalankan dcmdump: %s</td></tr>", err)
 					continue
 				}
 				item := parseDCMDumpOutput(output)
-				if item.AccessionNumber == "" { // skip jika tidak ada accession
+				if item.AccessionNumber == "" || item.PatientID == "" { // skip jika tidak ada accession
 					continue
 				}
 				fmt.Fprintf(w, `<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><form class='upload-form' style='box-shadow:none;background:none;padding:0;margin:0;display:inline;' action='/mod/storewl' method='post' enctype='multipart/form-data'><input type='hidden' name='accession' value='%s'><input type='file' name='dicomFile' required><button type='submit' class='action-btn'>Store ke PACS</button></form></td></tr>`, item.PatientID, item.PatientName, item.AccessionNumber, item.Modality, item.AccessionNumber)
