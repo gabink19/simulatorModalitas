@@ -92,51 +92,46 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 				if item.AccessionNumber == "" || item.PatientID == "" { // skip jika tidak ada accession
 					continue
 				}
-				fmt.Fprintf(w, `<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><form class='upload-form' style='box-shadow:none;background:none;padding:0;margin:0;display:inline;' action='/mod/storewl' method='post' enctype='multipart/form-data'><input type='hidden' name='accession' value='%s'><input type='file' name='dicomFile' required><button type='submit' class='action-btn'>Store ke PACS</button></form></td></tr>`, item.PatientID, item.PatientName, item.AccessionNumber, item.Modality, item.AccessionNumber)
+				fmt.Fprintf(w, `<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><form class='upload-form store-wl-form' style='box-shadow:none;background:none;padding:0;margin:0;display:inline;' action='/mod/storewl' method='post' enctype='multipart/form-data'><input type='hidden' name='accession' value='%s'><input type='file' name='dicomFile' required><button type='submit' class='action-btn'>Store ke PACS</button></form></td></tr>`, item.PatientID, item.PatientName, item.AccessionNumber, item.Modality, item.AccessionNumber)
 			}
 		}
 	}
 	fmt.Fprintf(w, "</tbody></table>")
-	// Form store DICOM ke PACS (Orthanc)
-	// fmt.Fprintf(w, `<form class='upload-form' id='uploadForm' action='/mod/store' method='post' enctype='multipart/form-data'>
-	// 	<label>Store DICOM ke PACS (Orthanc):</label>
-	// 	<input type='file' name='dicomFile' required>
-	// 	<button type='submit'>Store ke PACS</button>
-	// </form>`)
 
-	// Tambahkan script AJAX upload + alert
+	// Script AJAX untuk form store-wl-form
 	fmt.Fprintf(w, `<script>
-	document.getElementById('uploadForm').onsubmit = function(e) {
-		e.preventDefault();
-		var form = this;
-		var data = new FormData(form);
-		var xhr = new XMLHttpRequest();
-		xhr.open('POST', form.action, true);
-		xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4) {
-				if (xhr.status == 200) {
-					try {
-						var resp = JSON.parse(xhr.responseText);
-						alert('Sukses: ' + (resp.message || 'DICOM berhasil di-store ke Orthanc!'));
-						form.reset();
-						window.location.reload();
-					} catch (e) {
-						alert('Sukses, tapi response tidak valid!');
-						window.location.reload();
-					}
-				} else {
-					try {
-						var resp = JSON.parse(xhr.responseText);
-						alert('Gagal: ' + (resp.error || xhr.statusText));
-					} catch (e) {
-						alert('Gagal upload: ' + xhr.responseText);
-					}
-				}
-			}
-		};
-		xhr.send(data);
-	};
+	document.querySelectorAll('.store-wl-form').forEach(function(form) {
+	  form.onsubmit = function(e) {
+	    e.preventDefault();
+	    var data = new FormData(form);
+	    var xhr = new XMLHttpRequest();
+	    xhr.open('POST', form.action, true);
+	    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+	    xhr.onreadystatechange = function() {
+	      if (xhr.readyState == 4) {
+	        if (xhr.status == 200) {
+	          try {
+	            var resp = JSON.parse(xhr.responseText);
+	            alert('Sukses: ' + (resp.message || 'DICOM berhasil di-store ke Orthanc!'));
+	            form.reset();
+	            window.location.reload();
+	          } catch (e) {
+	            alert('Sukses, tapi response tidak valid!');
+	            window.location.reload();
+	          }
+	        } else {
+	          try {
+	            var resp = JSON.parse(xhr.responseText);
+	            alert('Gagal: ' + (resp.error || xhr.statusText));
+	          } catch (e) {
+	            alert('Gagal upload: ' + xhr.responseText);
+	          }
+	        }
+	      }
+	    };
+	    xhr.send(data);
+	  };
+	});
 </script>`)
 }
 
