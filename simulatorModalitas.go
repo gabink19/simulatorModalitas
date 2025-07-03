@@ -257,14 +257,14 @@ func storeWLHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Hapus file .wl jika sukses
-	worklistDir := os.Getenv("FOLDER_WORKLIST")
-	wlPath := filepath.Join(worklistDir, accession+".wl")
-	os.Remove(wlPath)
-	log.Println("📤 DICOM berhasil di-store ke Orthanc REST API dan .wl dihapus:", handler.Filename, wlPath)
+	// worklistDir := os.Getenv("FOLDER_WORKLIST")
+	// wlPath := filepath.Join(worklistDir, accession+".wl")
+	// os.Remove(wlPath)
+	log.Println("📤 DICOM berhasil di-store ke Orthanc REST API :", handler.Filename)
 	if isAjax(r) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
-			"message": fmt.Sprintf("DICOM '%s' berhasil di-store ke Orthanc & .wl dihapus!", handler.Filename),
+			"message": fmt.Sprintf("DICOM '%s' berhasil di-store ke Orthanc !", handler.Filename),
 		})
 	} else {
 		http.Redirect(w, r, "/mod", http.StatusSeeOther)
